@@ -1,0 +1,17 @@
+flowchart TD
+    A[Client sends message id, data] --> B[API receives request]
+    B --> C[Assign server-side timestamp]
+    C --> D[Push to Redis queue: queue:id:id]
+    D --> E[Worker dequeues next message from queue]
+    E --> F[Insert into event_log id, data, ts, was_applied]
+
+    F --> G[Fetch current DB row<br/>for ID]
+    G --> H{Incoming ts > DB ts?}
+    H -- Yes --> I[Update DB row<br/>with new data + ts]
+    H -- No --> J[Skip DB update]
+
+    style D fill:#e6f7ff,stroke:#000
+    style E fill:#e6f7ff,stroke:#000
+    style F fill:#d0e0ff,stroke:#000
+    style I fill:#ccffcc,stroke:#000
+    style J fill:#ffcccc,stroke:#000

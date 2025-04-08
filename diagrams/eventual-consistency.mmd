@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant ClientA
+    participant ClientB
+    participant API Server
+    participant Database
+
+    Note over ClientA, ClientB: Both clients send messages with timestamps
+
+    ClientA->>API Server: POST /upsert { id: 1, data: "Hello", ts: 13:00:00 }
+    ClientB->>API Server: POST /upsert { id: 1, data: "World", ts: 13:00:01 }
+
+    API Server->>Database: SELECT current_ts FROM table WHERE id = 1
+    alt If incoming_ts > current_ts
+        API Server->>Database: UPDATE table SET data = "Hello", ts = 13:00:00
+    else
+        Note right of Database: Skip update
+    end
+
+    API Server->>Database: SELECT current_ts FROM table WHERE id = 1
+    alt If incoming_ts > current_ts
+        API Server->>Database: UPDATE table SET data = "World", ts = 13:00:01
+    else
+        Note right of Database: Skip update
+    end

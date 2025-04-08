@@ -1,0 +1,17 @@
+flowchart TD
+    A[Client sends message with ID, data, timestamp] --> B[API receives request]
+    B --> B1[Insert message into event_log table]
+    B1 --> C[Fetch existing row from DB by ID]
+    C --> D{Row exists?}
+    
+    D -- No --> E[Insert new row with data and timestamp]
+    D -- Yes --> F[Compare incoming timestamp with existing timestamp]
+    F --> G{Incoming > Existing?}
+    
+    G -- Yes --> H[Update DB row with new data and timestamp]
+    G -- No --> I[Skip update, record was stale]
+
+    style B1 fill:#d0e0ff,stroke:#000
+    style E fill:#ccffcc
+    style H fill:#ccffcc
+    style I fill:#ffcccc
